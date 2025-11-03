@@ -44,3 +44,12 @@ jobs:
       - name: Test and build
         run: |
           python pw --clean build
+
+      # Upload build artifacts for tags only
+      - name: Upload build artifacts
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os == 'Ubuntu' && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 90

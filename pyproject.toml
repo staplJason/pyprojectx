@@ -3,9 +3,16 @@ name = "pyprojectx"
 version = "3.2.0.dev"
 description = "Execute scripts from pyproject.toml, installing tools on-the-fly"
 license = { text = "MIT" }
-authors = [{ name = "Houbie", email = "ivo@houbrechts-it.be" }]
+authors = [
+    { name = "Houbie", email = "ivo@houbrechts-it.be" },
+    { name = "Jason", email = "jason@example.com" }
+]
 readme = "README.md"
-urls = { homepage = "https://github.com/pyprojectx/pyprojectx", documentation = "https://pyprojectx.github.io" }
+urls = { 
+    homepage = "https://github.com/staplJason/pyprojectx", 
+    repository = "https://github.com/staplJason/pyprojectx",
+    "Bug Tracker" = "https://github.com/staplJason/pyprojectx/issues"
+}
 
 keywords = ["build", "dependency", "pyprojectx"]
 classifiers = [
@@ -79,9 +86,8 @@ build = ["@install", "@check", "uv build"]
 
 # used in GitHub actions:
 export-locked-requirements = "uv export -q --frozen --no-dev --no-editable --no-emit-project --no-hashes --no-annotate --no-header -o dist/requirements.txt"
-publish = "uv publish --username __token__"
+
+# GitHub Packages publishing (replaces PyPI)
+build-for-release = ["@install", "@check", "uv build"]
 
 generate-usage = "uv run python -m pyprojectx.wrapper.pw --help > docs/docs/usage.txt"
-serve-docs = { cmd = "mkdocs serve", cwd = "docs" }
-generate-docs = { cmd = ["@install", "@generate-usage && mkdocs build"], cwd = "docs" }
-deploy-docs = { cmd = "mkdocs gh-deploy", cwd = "docs" }

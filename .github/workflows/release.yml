@@ -1,41 +1,58 @@
 name: Release
 
 on:
-  # Release is only done manually
-  workflow_dispatch:
-    branches:
-      - main
-    inputs:
-      release_version:
-        description: 'Which version to release'
-        required: true
+  # Release is triggered by version tags
+  push:
+    tags:
+      - 'v*.*.*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
 
 jobs:
-  release-pypi:
-    name: release-pypi
+  release:
+    name: Build and Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
       - name: Build release
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           ./pw --clean export-locked-requirements
-          ./pw prep-release ${{ inputs.release_version }}
-          ./pw build
-          git push --follow-tags origin
+          ./pw build-for-release
 
-      - name: Create github release
-        if: ${{ !contains(inputs.release_version, 'rc') && !contains(inputs.release_version, 'b') }}
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_version }}
-          body_path: .release-changelog.md
-          files: wrappers.zip
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Installation
+            
+            ```bash
+            # Install from this release
+            pip install https://github.com/staplJason/pyprojectx/releases/download/${{ steps.get_version.outputs.VERSION }}/pyprojectx-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
+            
+            # Or install from git
+            pip install git+https://github.com/staplJason/pyprojectx.git@${{ steps.get_version.outputs.VERSION }}
+            ```
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            wrappers.zip
 
-      - name: Publish to Pypi
-        run: ./pw publish --password ${{ secrets.PYPI_TOKEN }}
+      - name: Upload artifacts to release
+        run: |
+          echo "✅ Release ${{ steps.get_version.outputs.VERSION }} created successfully"
+          echo "📦 Packages are available for download from the GitHub release"

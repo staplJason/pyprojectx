@@ -1,0 +1,164 @@
+#!/bin/bash
+# Fork version helper - manages version tagging for releases
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}🏷️  Fork Version Helper${NC}"
+echo "======================================="
+
+# Check if we're in a git repository
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo -e "${RED}❌ Not in a git repository${NC}"
+    exit 1
+fi
+
+# Check if we're on main branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo -e "${YELLOW}⚠️  Warning: You're not on the main branch (current: $CURRENT_BRANCH)${NC}"
+    echo "It's recommended to create releases from the main branch."
+    read -p "Continue anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}❌ Cancelled${NC}"
+        exit 1
+    fi
+fi
+
+# Check for uncommitted changes
+if ! git diff-index --quiet HEAD --; then
+    echo -e "${YELLOW}⚠️  Warning: You have uncommitted changes:${NC}"
+    git status --short
+    echo
+    read -p "Continue anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}❌ Cancelled${NC}"
+        exit 1
+    fi
+fi
+
+# Get current commit hash
+CURRENT_COMMIT=$(git rev-parse HEAD)
+CURRENT_COMMIT_SHORT=$(git rev-parse --short HEAD)
+
+# Get the last version tag
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+if [ "$LAST_TAG" = "none" ]; then
+    echo -e "${YELLOW}📋 No previous version tags found${NC}"
+    LAST_TAG_COMMIT="none"
+else
+    LAST_TAG_COMMIT=$(git rev-list -n 1 "$LAST_TAG" 2>/dev/null || echo "none")
+    echo -e "${GREEN}📋 Last version tag: $LAST_TAG${NC}"
+fi
+
+# Check if current commit already has a version tag
+EXISTING_TAG=$(git describe --exact-match --tags HEAD 2>/dev/null || echo "none")
+if [ "$EXISTING_TAG" != "none" ]; then
+    echo -e "${YELLOW}⚠️  Current commit ($CURRENT_COMMIT_SHORT) already has version tag: $EXISTING_TAG${NC}"
+    echo -e "${BLUE}🚀 A release for this commit may already exist or be in progress.${NC}"
+    exit 0
+fi
+
+# Show commits since last tag
+if [ "$LAST_TAG" != "none" ] && [ "$LAST_TAG_COMMIT" != "none" ]; then
+    COMMITS_SINCE=$(git rev-list --count ${LAST_TAG}..HEAD)
+    echo -e "${BLUE}📊 Commits since $LAST_TAG: $COMMITS_SINCE${NC}"
+    
+    if [ "$COMMITS_SINCE" -eq 0 ]; then
+        echo -e "${YELLOW}⚠️  No new commits since last tag${NC}"
+        exit 0
+    fi
+    
+    echo -e "${BLUE}📝 Recent commits:${NC}"
+    git log --oneline ${LAST_TAG}..HEAD | head -10
+    echo
+fi
+
+# Get current version from pyproject.toml
+CURRENT_PROJECT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/' || echo "unknown")
+echo -e "${BLUE}📦 Current pyproject.toml version: $CURRENT_PROJECT_VERSION${NC}"
+
+# Suggest next version
+if [ "$LAST_TAG" != "none" ]; then
+    # Remove 'v' prefix if present for version comparison
+    CLEAN_LAST_TAG=$(echo "$LAST_TAG" | sed 's/^v//')
+    
+    # Simple version increment suggestion (patch version)
+    IFS='.' read -ra VERSION_PARTS <<< "$CLEAN_LAST_TAG"
+    MAJOR=${VERSION_PARTS[0]}
+    MINOR=${VERSION_PARTS[1]:-0}
+    PATCH=${VERSION_PARTS[2]:-0}
+    
+    # Remove any pre-release suffixes from patch
+    PATCH=$(echo "$PATCH" | sed 's/[^0-9].*//')
+    
+    SUGGESTED_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+else
+    SUGGESTED_VERSION="1.0.0"
+fi
+
+echo -e "${GREEN}💡 Suggested next version: $SUGGESTED_VERSION${NC}"
+echo
+
+# Ask for new version
+echo -e "${BLUE}What version do you want to tag?${NC}"
+read -p "Enter version (or press Enter for $SUGGESTED_VERSION): " NEW_VERSION
+
+if [ -z "$NEW_VERSION" ]; then
+    NEW_VERSION="$SUGGESTED_VERSION"
+fi
+
+# Validate version format (basic)
+if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+    echo -e "${RED}❌ Invalid version format. Use semantic versioning (e.g., 1.2.3)${NC}"
+    exit 1
+fi
+
+# Check if tag already exists
+if git rev-parse "refs/tags/$NEW_VERSION" >/dev/null 2>&1; then
+    echo -e "${RED}❌ Tag $NEW_VERSION already exists${NC}"
+    exit 1
+fi
+
+# Show what will happen
+echo
+echo -e "${BLUE}🎯 Release Plan:${NC}"
+echo "================================"
+echo -e "${GREEN}Version:${NC} $NEW_VERSION"
+echo -e "${GREEN}Commit:${NC} $CURRENT_COMMIT_SHORT ($CURRENT_COMMIT)"
+echo -e "${GREEN}Branch:${NC} $CURRENT_BRANCH"
+echo
+echo -e "${BLUE}📋 This will:${NC}"
+echo "1. Create and push tag: $NEW_VERSION"
+echo "2. Trigger GitHub Actions release workflow"
+echo "3. Build and publish packages to GitHub Releases"
+echo "4. Create a GitHub release with installation instructions"
+echo
+
+# Confirm
+read -p "🤔 Create this release? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}🏷️  Creating tag $NEW_VERSION...${NC}"
+    git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+    
+    echo -e "${BLUE}📤 Pushing tag to origin...${NC}"
+    git push origin "$NEW_VERSION"
+    
+    echo -e "${GREEN}✅ Release $NEW_VERSION initiated!${NC}"
+    echo -e "${BLUE}🚀 Check GitHub Actions for build progress:${NC}"
+    echo "   https://github.com/staplJason/pyprojectx/actions"
+    echo
+    echo -e "${BLUE}📦 Release will be available at:${NC}"
+    echo "   https://github.com/staplJason/pyprojectx/releases/tag/$NEW_VERSION"
+else
+    echo -e "${RED}❌ Release cancelled${NC}"
+fi

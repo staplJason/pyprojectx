@@ -1,10 +1,27 @@
 ![pyprojectx](https://pyprojectx.github.io/assets/px.png)
 
-# Pyprojectx: All-inclusive Python Projects
+# Pyprojectx: All-inclusive Python Projects (staplJason Fork)
 
 Execute scripts from pyproject.toml, installing tools on-the-fly
 
-## [Full documentation](https://pyprojectx.github.io)
+> **Note**: This is a personal fork of [pyprojectx/pyprojectx](https://github.com/pyprojectx/pyprojectx). 
+> It may include experimental features or customizations. For the official version, visit the upstream repository.
+
+## Installation
+
+Install directly from this GitHub repository:
+
+```bash
+# Install latest from main branch
+pip install git+https://github.com/staplJason/pyprojectx.git
+
+# Or install a specific release
+pip install https://github.com/staplJason/pyprojectx/releases/download/v3.2.0/pyprojectx-3.2.0-py3-none-any.whl
+```
+
+## Documentation
+
+For documentation, see the [official pyprojectx documentation](https://pyprojectx.github.io).
 
 ## Introduction
 Pyprojectx makes it easy to create all-inclusive Python projects; no need to install any tools upfront,
@@ -28,26 +45,26 @@ All checks passed!
 
 Projects can be build/tested/used immediately without explicit installation nor initialization:
 ```bash
-git clone https://github.com/pyprojectx/px-demo.git
-cd px-demo
+git clone https://github.com/staplJason/pyprojectx.git
+cd pyprojectx
 ./pw build
 ```
 ![Clone and Build](https://raw.githubusercontent.com/pyprojectx/pyprojectx/main/docs/docs/assets/build.png)
 
-## Installation
+## Wrapper Scripts Installation
 One of the key features is that there is no need to install anything explicitly (except a Python 3.9+ interpreter).
 
 `cd` into your project directory and download the
-[wrapper scripts](https://github.com/pyprojectx/pyprojectx/releases/latest/download/wrappers.zip):
+[wrapper scripts](https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip):
 
 **Linux/Mac**
 ```bash
-curl -LO https://github.com/pyprojectx/pyprojectx/releases/latest/download/wrappers.zip && unzip wrappers.zip && rm -f wrappers.zip
+curl -LO https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip && unzip wrappers.zip && rm -f wrappers.zip
 ```
 
 **Windows**
 ```powershell
-Invoke-WebRequest https://github.com/pyprojectx/pyprojectx/releases/latest/download/wrappers.zip -OutFile wrappers.zip; Expand-Archive -Path wrappers.zip -DestinationPath .; Remove-Item -Path wrappers.zip
+Invoke-WebRequest https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip -OutFile wrappers.zip; Expand-Archive -Path wrappers.zip -DestinationPath .; Remove-Item -Path wrappers.zip
 ```
 
 ## Getting started
@@ -128,3 +145,34 @@ mklink pw %PYPROJECTX_PACKAGE%\src\pyprojectx\wrapper\pw.py
 # or copy the wrapper script if you can't create a symlink on windows
 copy %PYPROJECTX_PACKAGE%\src\pyprojectx\wrapper\pw.py pw
 ```
+
+## Fork Management
+
+This fork includes helper scripts for managing releases and upstream synchronization:
+
+### Creating Releases
+
+Use the `fork-ver` script to create version-tagged releases:
+
+```bash
+./fork-ver
+```
+
+This script will:
+- Show the current state (last tag, commits since last tag, etc.)
+- Suggest the next version number
+- Create and push a version tag
+- Trigger GitHub Actions to build and publish the release
+
+### Syncing with Upstream
+
+Use the `fork-sync` script to pull changes from the upstream repository:
+
+```bash
+./fork-sync
+```
+
+This script will:
+- Fetch changes from the upstream pyprojectx repository
+- Show what changes would be merged
+- Allow you to review and merge upstream changes
