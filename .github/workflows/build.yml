@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ Ubuntu, Windows ]
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" , "3.14" ]
+        os: [Ubuntu, Windows]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
           - os: Ubuntu
             image: ubuntu-latest

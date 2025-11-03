@@ -1,6 +1,6 @@
 ![pyprojectx](https://pyprojectx.github.io/assets/px.png)
 
-# Pyprojectx: All-inclusive Python Projects (staplJason Fork)
+# px: All-inclusive Python Projects (staplJason Fork)
 
 Execute scripts from pyproject.toml, installing tools on-the-fly
 
@@ -12,16 +12,40 @@ Execute scripts from pyproject.toml, installing tools on-the-fly
 Install directly from this GitHub repository:
 
 ```bash
-# Install latest from main branch
-pip install git+https://github.com/staplJason/pyprojectx.git
+# Install latest from main branch with pip
+pip install git+https://github.com/staplJason/px.git
 
-# Or install a specific release
-pip install https://github.com/staplJason/pyprojectx/releases/download/v3.2.0/pyprojectx-3.2.0-py3-none-any.whl
+# Install latest from main branch with uv (into current environment)
+uv pip install git+https://github.com/staplJason/px.git
+
+# Install as a global tool with uv (recommended)
+uv tool install git+https://github.com/staplJason/px.git
+
+# Or install a specific release with pip
+pip install https://github.com/staplJason/px/releases/download/v3.2.0/px-3.2.0-py3-none-any.whl
+
+# Or install a specific release with uv (into current environment)
+uv pip install https://github.com/staplJason/px/releases/download/v3.2.0/px-3.2.0-py3-none-any.whl
+
+# Or install a specific release as a global tool with uv (recommended)
+uv tool install https://github.com/staplJason/px/releases/download/v3.2.0/px-3.2.0-py3-none-any.whl
 ```
 
 ## Documentation
 
 For documentation, see the [official pyprojectx documentation](https://pyprojectx.github.io).
+
+## Usage
+
+After installing with `uv tool install`, you can use the global `px` command:
+
+```bash
+px --help
+px build
+px test
+```
+
+Or use the traditional project wrapper approach by downloading the wrapper scripts to your project.
 
 ## Introduction
 Pyprojectx makes it easy to create all-inclusive Python projects; no need to install any tools upfront,
@@ -45,8 +69,8 @@ All checks passed!
 
 Projects can be build/tested/used immediately without explicit installation nor initialization:
 ```bash
-git clone https://github.com/staplJason/pyprojectx.git
-cd pyprojectx
+git clone https://github.com/staplJason/px.git
+cd px
 ./pw build
 ```
 ![Clone and Build](https://raw.githubusercontent.com/pyprojectx/pyprojectx/main/docs/docs/assets/build.png)
@@ -55,16 +79,16 @@ cd pyprojectx
 One of the key features is that there is no need to install anything explicitly (except a Python 3.9+ interpreter).
 
 `cd` into your project directory and download the
-[wrapper scripts](https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip):
+[wrapper scripts](https://github.com/staplJason/px/releases/latest/download/wrappers.zip):
 
 **Linux/Mac**
 ```bash
-curl -LO https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip && unzip wrappers.zip && rm -f wrappers.zip
+curl -LO https://github.com/staplJason/px/releases/latest/download/wrappers.zip && unzip wrappers.zip && rm -f wrappers.zip
 ```
 
 **Windows**
 ```powershell
-Invoke-WebRequest https://github.com/staplJason/pyprojectx/releases/latest/download/wrappers.zip -OutFile wrappers.zip; Expand-Archive -Path wrappers.zip -DestinationPath .; Remove-Item -Path wrappers.zip
+Invoke-WebRequest https://github.com/staplJason/px/releases/latest/download/wrappers.zip -OutFile wrappers.zip; Expand-Archive -Path wrappers.zip -DestinationPath .; Remove-Item -Path wrappers.zip
 ```
 
 ## Getting started

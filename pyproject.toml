@@ -1,5 +1,5 @@
 [project]
-name = "pyprojectx"
+name = "px"
 version = "3.2.0.dev"
 description = "Execute scripts from pyproject.toml, installing tools on-the-fly"
 license = { text = "MIT" }
@@ -9,9 +9,9 @@ authors = [
 ]
 readme = "README.md"
 urls = { 
-    homepage = "https://github.com/staplJason/pyprojectx", 
-    repository = "https://github.com/staplJason/pyprojectx",
-    "Bug Tracker" = "https://github.com/staplJason/pyprojectx/issues"
+    homepage = "https://github.com/staplJason/px", 
+    repository = "https://github.com/staplJason/px",
+    "Bug Tracker" = "https://github.com/staplJason/px/issues"
 }
 
 keywords = ["build", "dependency", "pyprojectx"]
@@ -34,7 +34,7 @@ dev = [
 ]
 
 [project.scripts]
-pyprojectx = "pyprojectx.cli:main"
+px = "pyprojectx.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.9"]

@@ -4,8 +4,8 @@ on:
   # Release is triggered by version tags
   push:
     tags:
-      - 'v*.*.*'
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - "v*.*.*"
+      - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
   release:
@@ -14,12 +14,12 @@ jobs:
     permissions:
       contents: write
       packages: write
-      
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Get version from tag
         id: get_version
@@ -39,14 +39,32 @@ jobs:
           name: Release ${{ steps.get_version.outputs.VERSION }}
           body: |
             ## Installation
-            
+
             ```bash
-            # Install from this release
-            pip install https://github.com/staplJason/pyprojectx/releases/download/${{ steps.get_version.outputs.VERSION }}/pyprojectx-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
-            
-            # Or install from git
-            pip install git+https://github.com/staplJason/pyprojectx.git@${{ steps.get_version.outputs.VERSION }}
+            # Install from this release with pip
+            pip install https://github.com/staplJason/px/releases/download/${{ steps.get_version.outputs.VERSION }}/px-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
+
+            # Install from this release with uv (into current environment)
+            uv pip install https://github.com/staplJason/px/releases/download/${{ steps.get_version.outputs.VERSION }}/px-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
+
+            # Install as a global tool with uv (recommended)
+            uv tool install https://github.com/staplJason/px/releases/download/${{ steps.get_version.outputs.VERSION }}/px-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
+
+            # Or install from git tag with pip
+            pip install git+https://github.com/staplJason/px.git@${{ steps.get_version.outputs.VERSION }}
+
+            # Or install from git tag with uv (into current environment)
+            uv pip install git+https://github.com/staplJason/px.git@${{ steps.get_version.outputs.VERSION }}
+
+            # Or install from git tag as a global tool with uv (recommended)
+            uv tool install git+https://github.com/staplJason/px.git@${{ steps.get_version.outputs.VERSION }}
             ```
+
+            ## Usage
+
+            After installing as a tool: `px build`, `px test`, etc.
+
+            Or use project wrappers: `./pw build`, `./pw test`, etc.
           files: |
             dist/*.whl
             dist/*.tar.gz
@@ -56,3 +74,4 @@ jobs:
         run: |
           echo "✅ Release ${{ steps.get_version.outputs.VERSION }} created successfully"
           echo "📦 Packages are available for download from the GitHub release"
+          echo "🚀 Install with: uv tool install https://github.com/staplJason/px/releases/download/${{ steps.get_version.outputs.VERSION }}/px-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl"
